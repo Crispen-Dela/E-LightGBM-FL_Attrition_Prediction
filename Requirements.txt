@@ -1,0 +1,13 @@
+4E: Full Reproducibility Checklist
+
+# Reproducibility Item Your Specific Plan
+1 Data preprocessing pipeline Missing values: features with >20% missingness dropped (e.g., specific course enrolment indicators). Continuous variables (GPA, age, attendance %) median-imputed. Categorical variables (faculty, gender, housing status) mode-imputed. All features normalised using StandardScaler.
+2 Data splitting strategy Stratified 5-fold cross-validation (80% training / 20% test per fold) stratified by attrition status to preserve class distribution in each fold. Random seed fixed at 2026.
+3 Class imbalance handling Focal loss integrated into LightGBM objective (not external oversampling). α parameter set to 0.75 for the at-risk class (proportional to inverse class frequency); γ = 2 focusing parameter.
+4 Model architecture description LightGBM: num_leaves=31, max_depth=-1 (best-first growth), n_estimators=200, min_child_samples=20. E-LightGBM-FL: identical architecture with custom objective function replacing default binary_logloss.
+5 Hyperparameter settings learning_rate=0.05, batch_size=16,384 (LightGBM default), n_estimators=200, early_stopping_rounds=50, num_leaves=31, feature_fraction=0.8, bagging_fraction=0.8.
+6 Training procedure Optimizer: LightGBM histogram-based training. Loss function: focal_loss (engineered) for E-LightGBM-FL; binary_logloss for baseline. Early stopping when validation Macro F1 does not improve for 50 rounds.
+7 Evaluation protocol 5-fold stratified cross-validation with fixed seed (2026). Each fold: 80% train / 20% test. Model performance reported as mean ± standard deviation across folds.
+8 Baseline models named Baseline 1: Unmodified LightGBM (binary_logloss). Baseline 2: XGBoost (default loss). Baseline 3: Logistic Regression.
+9 Statistical significance test named Wilcoxon Signed-Rank Test (two-sided, α=0.05) comparing E-LightGBM-FL vs. each baseline across 5 folds.
+10 Software and library versions Python 3.10.12, LightGBM 4.0.0, XGBoost 2.0.0, scikit-learn 1.3.0, SHAP 0.42.0, NumPy 1.24.0, Pandas 2.0.0, Matplotlib 3.7.0
